@@ -38,6 +38,7 @@ if __name__ == "__main__":
                                   TargetImage={'Bytes': imageTarget.read()})
 
     #print json.dumps(response, sort_keys=True, indent=4)
+    os.system('echo "%s">%s' % (json.dumps(response, sort_keys=True, indent=4), 'last_compare.log'))
 
     if not response['FaceMatches']:
         print bcolors.RED + 'No Match'

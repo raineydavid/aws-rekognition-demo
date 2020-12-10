@@ -21,8 +21,8 @@ twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-model='arn:aws:rekognition:us-east-1:397652707012:project/Real_Humus/version/Real_Humus.2019-12-24T15.41.28/1577194888945'
-min_confidence=60
+model='arn:aws:rekognition:us-east-1:397652707012:project/Real_Humus/version/Real_Humus.2020-09-03T10.29.40/1599118180517'
+min_confidence=0
 region = 'us-east-1'
 
 def lambda_handler(event, context):
@@ -49,31 +49,35 @@ def show_custom_labels(model,bucket,photo, min_confidence):
     client=boto3.client('rekognition', region_name=region)
 
     #Call DetectCustomLabels
+    logger.info('Calling rekognition.detect_custom_labels with model: ' + model)
+
     response = client.detect_custom_labels(Image={'S3Object': {'Bucket': bucket, 'Name': photo}},
         MinConfidence=min_confidence,
         ProjectVersionArn=model)
 
-    # Load image from S3 bucket
-    s3_connection = boto3.client('s3')
+    logger.info('Response Data: ' + json.dumps(response))
 
-    tags = s3_connection.get_object_tagging(
-        Bucket=bucket,
-        Key=photo
-    )
+    if len(response['CustomLabels']) > 0:
+        # Load image from S3 bucket
+        s3_connection = boto3.client('s3')
 
-    # Get a list of all tags
-    tag_set = tags['TagSet']
+        tags = s3_connection.get_object_tagging(
+            Bucket=bucket,
+            Key=photo
+        )
 
-    # Print out each tag
-    for tag in tag_set:
-        if tag['Key'] == 'twitter_id':
-            twitter_id = tag['Value']
-        if tag['Key'] == 'twitter_user':
-            user_id = tag['Value']
-        if tag['Key'] == 'additional_users':
-            additional_users = tag['Value']
+        # Get a list of all tags
+        tag_set = tags['TagSet']
 
-    if response:
+        # Print out each tag
+        for tag in tag_set:
+            if tag['Key'] == 'twitter_id':
+                twitter_id = tag['Value']
+            if tag['Key'] == 'twitter_user':
+                user_id = tag['Value']
+            if tag['Key'] == 'additional_users':
+                additional_users = tag['Value']
+
         #s3_object = s3_connection.Object(bucket,photo)
         s3_response = s3_connection.get_object(
             Bucket=bucket,
@@ -150,18 +154,15 @@ def show_custom_labels(model,bucket,photo, min_confidence):
         in_mem_file.seek(0)
 
         twitter_resp = twitter.upload_media(media=in_mem_file)
-        if text:
-            response = twitter.update_status(status=('@%s %sThis is what I see...\nFollow @HumusNotHumus') % (user_id, additional_users), media_ids=twitter_resp['media_id'], in_reply_to_status_id=twitter_id)
+
+        if text and round(customLabel['Confidence'], 2)>50:
+            response = twitter.update_status(status=('@%s %sThis is what I see...\nFollow @HummusNotHummus') % (user_id, additional_users), media_ids=twitter_resp['media_id'], in_reply_to_status_id=twitter_id)
         else:
-            response = twitter.update_status(status=('@%s %sSorry, no Humus here!\nFollow @HumusNotHumus') % (user_id, additional_users), media_ids=twitter_resp['media_id'], in_reply_to_status_id=twitter_id)
+            response = twitter.update_status(status=('@%s %sWell... I\'m not sure if there is Hummus here... 😆\nFollow @HummusNotHummus') % (user_id, additional_users), media_ids=twitter_resp['media_id'], in_reply_to_status_id=twitter_id)
 
         logger.info(json.dumps(response))
 
         return {'message' : 'Found labels'}
 
     else:
-        response = twitter.update_status(status=('@%s Sorry, no Humus here!\nFollow @HumusNotHumus') % (user_id), in_reply_to_status_id=twitter_id)
-
-        logger.info(json.dumps(response))
-
         return {'message' : 'No labels'}

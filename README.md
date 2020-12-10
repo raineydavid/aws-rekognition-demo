@@ -2,7 +2,7 @@
 A collection of demos using Amazon Rekognition
 
 ## capture.py
-Capture a photo from the local camera or file, run Amazon Rekognition to detected objects in the photo, then generate a Amazon Polly voice that describes the photo.
+Capture a photo from local camera or file, run Amazon Rekognition to detected objects in the photo, then generate an Amazon Polly voice that describes the photo.
 In case there are humans in the photo, the code will run Amazon Rekognition again to detect faces.
 
 Usage:
@@ -13,11 +13,11 @@ capture.py [image_path]
 ```
 
 ## search_face.py
-Capture a photo from the local camera or file, run Amazon Rekognition to detect faces and them try to match detected faces to a specific collectionId.
+Capture a photo from local camera or file, run Amazon Rekognition to detect faces and them try to match detected faces to a specific collectionId.
 
 Usage:
 ```
-capture.py [image_path]
+search_face.py [image_path]
 
 * Use with no arguments to take a photo with the camera, or one argument to use a saved image
 ```

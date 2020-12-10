@@ -102,7 +102,7 @@ Resources:
         # Name of lambda function that should be invoked to process tweets. Note, this must be a function name and not a function ARN.
         ProcessorFunctionName: !Ref TwitterFunction
         # Search query to be passed to Twitter to select tweets to use for the event source.
-        SearchQuery: '%23humus'
+        SearchQuery: '%23humus%20OR%20%23hummus'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
