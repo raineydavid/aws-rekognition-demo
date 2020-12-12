@@ -94,7 +94,7 @@ def take_photo(save=False):
 # Read image from file
 def read_image(filename):
     try:
-        fin = open(filename, 'r')
+        fin = open(filename, 'rb')
         encoded_image_bytes = fin.read()
         fin.close()
         return encoded_image_bytes
