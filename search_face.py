@@ -84,7 +84,7 @@ def take_photo(save=False):
 # Read image from file
 def read_image(filename):
     try:
-        fin = open(filename, 'r')
+        fin = open(filename, 'rb')
         encoded_image_bytes = fin.read()
         fin.close()
         return encoded_image_bytes
@@ -121,7 +121,7 @@ def reko_search_faces(image_bytes, collection_id):
         return False
 
 def search_faces(encoded_image, reko_response, collection_id):
-    encoded_image=np.fromstring(encoded_image,np.uint8);
+    encoded_image=np.frombuffer(encoded_image,np.uint8);
     image = cv2.imdecode(encoded_image, cv2.IMREAD_COLOR)
     image_height, image_width = image.shape[:2]
     new_image = image

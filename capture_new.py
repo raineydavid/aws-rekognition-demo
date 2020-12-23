@@ -56,7 +56,7 @@ def take_photo(save=False):
         speak("Taking a photo")
     #vidcap=cv2.VideoCapture()
     # change the number of the camera that you open to cycle through different options if you have multiple connected cameras
-    cam = cv2.VideoCapture(0)
+    cam = cv2.VideoCapture(1)
     #sleep(2)
 
     cv2.namedWindow("Preview", cv2.WINDOW_NORMAL)
@@ -104,10 +104,10 @@ def read_image(filename):
 
 # Provide a string and an optional voice attribute and play the streamed audio response
 # Defaults to the Salli voice
-def speak(text_string, voice="Joanna"):
+def speak(text_string, voice="Joanna", engine="neural"):
     try:
         # Request speech synthesis
-        response = polly.synthesize_speech(Text=text_string,
+        response = polly.synthesize_speech(Engine=engine,Text=text_string,
             TextType="text", OutputFormat="pcm", VoiceId=voice)
     except (BotoCoreError, ClientError) as error:
         # The service returned an error, exit gracefully
@@ -254,7 +254,7 @@ def my_sort(e):
   return e['Confidence']
 
 def save_image_with_bounding_boxes(encoded_image, reko_response):
-    encoded_image=np.fromstring(encoded_image,np.uint8);
+    encoded_image=np.frombuffer(encoded_image,np.uint8);
     image = cv2.imdecode(encoded_image, cv2.IMREAD_COLOR)
     image_height, image_width = image.shape[:2]
     i = 0
@@ -301,7 +301,7 @@ else:
     print ("Use with no arguments to take a photo with the camera, or one argument to use a saved image")
     exit(-1)
 
-translate = 'es'
+translate = 'ru'
 labels=reko_detect_labels(encoded_image)
 humans, labels_response_string = create_verbal_response_labels(labels)
 print (bcolors.GREEN + labels_response_string + bcolors.ENDC)
@@ -322,10 +322,10 @@ if humans:
     if translate:
         command = "aws translate translate-text --text '%s' --source-language-code en --target-language-code %s > tmp" % (faces_response_string, translate)
         translated = os.system(command)
-        output = open('tmp', 'r')
-        translation = json.load(output)
+        with open('tmp', encoding='utf-8') as file:
+            translation = json.load(file)
         print (bcolors.RED + '\n\n\nTranslated to %s' % translate)
         print (translation['TranslatedText'])
-        speak (json.dumps(translation['TranslatedText'], ensure_ascii=False).encode('utf8'), "Lucia")
+        speak (json.dumps(translation['TranslatedText'], ensure_ascii=False), "Tatyana", "standard")
 else:
     print ("No humans detected. Skipping facial recognition")
